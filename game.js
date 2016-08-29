@@ -137,7 +137,7 @@ iter2dArray(ar, function(i, x , y){
 })
 function renderSprites(){
     this.img = new Image();
-    this.img.src = 'https://github.com/chrisrgibb/jsk132016/blob/master/pixrl1.png';
+    this.img.src = 'pixrl1.png';
 
 
 }
@@ -382,7 +382,7 @@ GameScene.prototype = {
 		}, this);
 		this.map.collisionTiles = [];
 		var img = new Image();
-		img.src = 'https://github.com/chrisrgibb/jsk132016/blob/master/pixrl1.png';
+		img.src = 'pixrl1.png';
 		// ctx.drawImage(this.img, inx * 5, yindex *5, 5, 5, x, y, 5, 5 );
 
 		ctx.drawImage(img, 32, 0, 16, 16, this.player.x-5, this.player.y-5, 16, 16 );
