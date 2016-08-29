@@ -1,7 +1,7 @@
 
 function fontDrawer(){
     var img = new Image();
-    img.src = 'https://github.com/chrisrgibb/jsk132016/blob/master/alphabet.png';
+    img.src = 'alphabet.png';
 
 	function getLetters(){
 		var letters = [];
