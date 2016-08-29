@@ -481,6 +481,7 @@ var Game = {
 		this.sprites = [];
 		this.ctx.scale(canvasScaleFactor, canvasScaleFactor);
 		this.ctx.imageSmoothingEnabled = false;
+		this.ctx.mozImageSmoothingEnabled = false;
 	
 		this.keys = KeyListeners();
 
