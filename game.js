@@ -12,13 +12,14 @@ function fontDrawer(){
 		for(var i = 0; i < 10; i++){
 			letters.push(String.fromCharCode(48 + i));
 		}
+		// letters.push(":");
 		return letters;
 	}
 
 	var fontdrawer = {
 		img : img, 
 		letters : getLetters(),
-        draw : function(ctx, sentance, x, y){
+        draw : function(ctx, sentance, x, y, scale){
 
             // draws one letter
             function drawFont(ctx, letter, x, y){
@@ -31,10 +32,15 @@ function fontDrawer(){
                 // console.log('drawing ' + charCode + " at " + inx);
                 ctx.drawImage(this.img, inx * 5, yindex *5, 5, 5, x, y, 5, 5 ); //;, );
             }
-
+			ctx.save();
+			if(scale) {
+				ctx.scale(scale, scale);
+			}
             for(var i = 0; i < sentance.length; i++){
 			    drawFont.call(this, ctx, sentance[i], i * 6 + x, y);
 		    }
+			ctx.restore();			
+			
         },
 		drawIcon : function(ctx, icon, x, y){
 			var yindex = 1;
@@ -80,10 +86,11 @@ function renderMap(ctx, map, glitchMode){
             }
             if (v === '100') {
                 // switch
-                ctx.fillStyle = "purple";
+                ctx.fillStyle = "gray";
                 ctx.fillRect(xpos, ypos, size, size);
-                this.fontdrawer.drawIcon(ctx, '>',xpos+3|0,ypos+5|0 );
-                this.fontdrawer.drawIcon(ctx, '>',xpos+8|0,ypos+5|0 );
+                // this.fontdrawer.drawIcon(ctx, '>',xpos+2|0,ypos+5|0 );
+                // this.fontdrawer.drawIcon(ctx, '>',xpos+7|0,ypos+5|0 );
+                this.fontdrawer.drawIcon(ctx, 'on',xpos+4|0,ypos+5|0 );
 
             }
             if(v === '101') {
@@ -159,7 +166,7 @@ function map1(){
 		[
 		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,101,0,0,0,0,101,0,0,0,0,0,100,0],
+		[1,0,0,0,0,0,0,0,0,0,0,0,100,0],
 		[1,2,2,2,2,3,4,15,2,2,2,2,2,2],
 		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -190,8 +197,18 @@ function map1(){
 	]
 	];
 	return {
-		maps : tiles
-	}
+		maps : tiles,
+		sprites : [
+			{
+				x : 50,
+				y  : 50 
+			},
+			{
+				x : 100, 
+				y  : 10
+			}
+		]
+	};
 };
 
 function map2(){
@@ -206,7 +223,7 @@ function map2(){
 		[1,0,0,4,100,0,0,0,4,0,0,0,0,0],
 		[1,0,0,1,1,1,1,1,1,1,1,0,1,1],
 		[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,0,0,0,0,0,0],
+		[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
 		[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
 		[1,100,0,5,0,0,0,0,0,0,0,0,0,0],
 		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -222,7 +239,7 @@ function map2(){
 		[1,0,0,4,0,0,0,0,0,0,0,100,0,0],
 		[1,0,0,1,1,1,1,1,1,1,1,1,1,1],
 		[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,0,0,0,0,0,0],
+		[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
 		[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
 		[1,0,0,5,0,0,0,0,0,0,0,0,0,0],
 		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -232,9 +249,17 @@ function map2(){
 		maps : [ 
 			map1, 
 			map2
+		],
+		start : [
+			90, // x
+			20 // y
 		]
-	};
-		
+	};		
+}
+
+function map3(){
+
+
 }
 var GameScene = function(game, sprites){
     this.sprites = sprites;
@@ -245,15 +270,6 @@ var GameScene = function(game, sprites){
 	this.game = game;
 	this.fontdrawer = fontDrawer();
     sprites.push(this.player);
-	var s2 = new Sprite();
-	s2.vx = s2.speed;
-	s2.vy = 0.5; // gravity
-	sprites.push(s2);
-
-	var s3 = new Sprite(100, 10);
-	s3.vx = s3.speed;
-	s3.vy = 0.5;
-	sprites.push(s3);
 	this.nextLevel(map1);
 	this.currentMap = 0;
 }
@@ -299,10 +315,6 @@ GameScene.prototype = {
 		if (keys.pressed[keys.F]) {
 			this.glitchMode = !this.glitchMode;
 		}
-		// if(keys.pressed[keys.A]) {
-		// 	// change map
-		
-		// }
 		if(keys.pressed[keys.S]) {
 
 		}
@@ -329,6 +341,8 @@ GameScene.prototype = {
 		this.map = this.maps[this.currentMap];
 	},
 	nextLevel : function(fn){
+		this.sprites = [this.player];
+		// get new map
 		var mazzz = fn();
 		this.maps = mazzz.maps.map(function(m){
 			var w = new World(resolution);
@@ -337,6 +351,20 @@ GameScene.prototype = {
 			return w;
 		}, this);
 		this.map = this.maps[0];
+		// add the players position
+		if(mazzz.start){
+			this.player.x = mazzz.start[0];
+			this.player.y = mazzz.start[1];
+		}
+		// add any sprites to it
+		if(mazzz.sprites) {
+			mazzz.sprites.forEach(function(s){
+				var spr = new Sprite(s.x, s.y);
+				spr.vx = spr.speed;
+				spr.vy = 0.5; // gravity
+				this.sprites.push(spr);
+			}, this);
+		}
 	},
     render : function (ctx) {
 		renderMap.call(this, ctx, this.map, this.glitchMode);
@@ -424,7 +452,11 @@ TitleScene.prototype = {
         }
     },
     render : function(ctx) {
-        this.g.fontdrawer.draw(ctx, 'game', 100, 100);
+        this.g.fontdrawer.draw(ctx, 'RPGlitch', 10, 10, 2);
+        this.g.fontdrawer.draw(ctx, 'Controls : ', 50, 50);
+        this.g.fontdrawer.draw(ctx, 'Arrows to move,', 50, 60);
+        this.g.fontdrawer.draw(ctx, 'A to open doors', 50, 70);
+        this.g.fontdrawer.draw(ctx, 'and press switches', 50, 80);
     }
 }
 var canvasScaleFactor = 3;
