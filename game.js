@@ -1,7 +1,5 @@
 
-function fontDrawer(){
-    var img = new Image();
-    img.src = 'alphabet.png';
+function fontDrawer(img){
 
 	function getLetters(){
 		var letters = [];
@@ -58,6 +56,30 @@ function fontDrawer(){
 	}
 	return fontdrawer;
 }
+function Images(){
+    var loader = {
+        images : {},
+        load : function(callback){
+
+            var files = ["alphabet", "pixrl1"];
+            var count = 0;
+            var loader = this;
+
+            files.forEach(function(f){
+                var abc = new Image();
+                abc.src = f + ".png";
+                abc.addEventListener("load", function(){
+                    count++;
+                    if(count===files.length){
+                        callback(loader.images);
+                    }
+                });
+                this.images[f] = abc;
+            }, this);
+        }
+    }
+    return loader;
+}
 function renderMap(ctx, map, glitchMode){
     var size = this.game.getPixelSize();
     var mapSize = map.size;
@@ -70,12 +92,42 @@ function renderMap(ctx, map, glitchMode){
             var v = map.map[y][x];
             var isSolidTile = map.isSolid(x, y);
             if (glitchMode) {
-                if(isSolidTile){
+                if (v === '100') {
+                    ctx.fillStyle = "gray";
+                    ctx.fillRect(xpos, ypos, size, size);
+                    this.fontdrawer.drawIcon(ctx, 'on',xpos+4|0,ypos+5|0 );
+                     // this.fontdrawer.drawIcon(ctx, '>',xpos+2|0,ypos+5|0 );
+                    // this.fontdrawer.drawIcon(ctx, '>',xpos+7|0,ypos+5|0 );
+                } else if (v === '30') {
+                    ctx.strokeStyle = "yellow";
+                    ctx.strokeRect(xpos, ypos, size, size);
+                } else if (v === '20') {
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(xpos, ypos, size, size);
+                } else if (v === '101') {
+                    // door
+                    var centrex = xpos + (size / 2) | 0;
+                    var centrey = ypos + (size/ 2) | 0;
+                    // var grd = ctx.createRadialGradient(centrex, centrey, 40, centrex, centrey, 0);
+                    ctx.save();
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = 'white';
+                    var grd = ctx.createLinearGradient(0,0,0, ypos +  20);
+                    // light blue
+                    grd.addColorStop(0, 'white');
+                    // dark blue
+                    grd.addColorStop(1, 'black');
+                    // ctx.fillStyle = "gray";
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(xpos, ypos, size, size);
+                    ctx.restore();
+                } else if(isSolidTile){
                     this.fontdrawer.draw(ctx, v, xpos+5|0, ypos+5|0);
                     ctx.strokeStyle = "green";
                     ctx.strokeRect(xpos, ypos, size, size);
                 } else {
-                    var g = Math.random() > 0.5 ? v : randomLetter();
+                    var g = Math.random() > 0.3 ? v : randomLetter();
+                    // var g= v;
                     this.fontdrawer.draw(ctx, g ,xpos+5|0, ypos+5|0 );
                 }
             } else {
@@ -84,42 +136,13 @@ function renderMap(ctx, map, glitchMode){
                     ctx.fillRect(xpos, ypos, size, size);
                 }
             }
-            if (v === '100') {
-                // switch
-                ctx.fillStyle = "gray";
-                ctx.fillRect(xpos, ypos, size, size);
-                // this.fontdrawer.drawIcon(ctx, '>',xpos+2|0,ypos+5|0 );
-                // this.fontdrawer.drawIcon(ctx, '>',xpos+7|0,ypos+5|0 );
-                this.fontdrawer.drawIcon(ctx, 'on',xpos+4|0,ypos+5|0 );
-
-            }
-            if(v === '101') {
-                // door
-                var centrex = xpos + (size / 2) | 0;
-                var centrey = ypos + (size/ 2) | 0;
-                // var grd = ctx.createRadialGradient(centrex, centrey, 40, centrex, centrey, 0);
-                ctx.save();
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = 'white';
-                var grd = ctx.createLinearGradient(0,0,0, ypos +  20);
-                // light blue
-                grd.addColorStop(0, 'white');
-                // dark blue
-                grd.addColorStop(1, 'black');
-                // ctx.fillStyle = "gray";
-                ctx.fillStyle = grd;
-                ctx.fillRect(xpos, ypos, size, size);
-                ctx.restore();
-            }
-
         }
     }
 }
 
 function iter2dArray(arr, fn){
-    var mapSize = arr.length;
-    for(var y = 0; y < mapSize; y++) {
-        for(var x = 0; x < mapSize; x++) {
+    for(var y = 0; y < arr.length; y++) {
+        for(var x = 0; x < arr[0].length; x++) {
             arr[y][x]
             fn(arr[y][x],x, y);
         }
@@ -137,10 +160,15 @@ iter2dArray(ar, function(i, x , y){
 })
 function renderSprites(){
     this.img = new Image();
-    this.img.src = 'pixrl1.png';
+    this.img.src = 'pixlr1.png';
 
 
 }
+// stats.js - http://github.com/mrdoob/stats.js
+var Stats=function(){function h(a){c.appendChild(a.dom);return a}function k(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();k(++l%c.children.length)},!1);var g=(performance||Date).now(),e=g,a=0,r=h(new Stats.Panel("FPS","#0ff","#002")),f=h(new Stats.Panel("MS","#0f0","#020"));
+if(self.performance&&self.performance.memory)var t=h(new Stats.Panel("MB","#f08","#201"));k(0);return{REVISION:16,dom:c,addPanel:h,showPanel:k,begin:function(){g=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();f.update(c-g,200);if(c>e+1E3&&(r.update(1E3*a/(c-e),100),e=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){g=this.end()},domElement:c,setMode:k}};
+Stats.Panel=function(h,k,l){var c=Infinity,g=0,e=Math.round,a=e(window.devicePixelRatio||1),r=80*a,f=48*a,t=3*a,u=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=f;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,f);b.fillStyle=k;b.fillText(h,t,u);b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(f,
+v){c=Math.min(c,f);g=Math.max(g,f);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=k;b.fillText(e(f)+" "+h+" ("+e(c)+"-"+e(g)+")",t,u);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,e((1-f/v)*p))}}};"object"===typeof module&&(module.exports=Stats);
 // random integer
 function randi(n){
 	n = n || 100
@@ -150,116 +178,191 @@ function randi(n){
 function randd(){
 	return Math.random();
 }
-//
 
-var mapz = {
-	2 : 'F'
-};
 /**
  * 0 = nothing
  * 1 - 10 = 1 2 3 4 5 6 7 8 9 a
  *  11 - 15 = b c d e f 
+ * 
+ * 20 = bad place
+ * 30 = yellow box
+ * 
+ * 100 = switch 
+ * 101 = exit
+ * 
  */
 
-function map1(){
-	var tiles = [
-		[
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,100,0],
-		[1,2,2,2,2,3,4,15,2,2,2,2,2,2],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,101,0],
-		[1,0,0,0,0,0,0,0,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	],
-	[
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,100,0],
-		[1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,0,0,0,0,0,0,0,0,0,101,0],
-		[1,0,0,0,0,0,0,0,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	]
-	];
-	return {
-		maps : tiles,
-		sprites : [
-			{
-				x : 50,
-				y  : 50 
-			},
-			{
-				x : 100, 
-				y  : 10
-			}
-		]
-	};
-};
+function getMaps(){
 
-function map2(){
-	var map1 = 
-		[
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,2,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,8,0,0,0,100,0],
-		[1,0,0,2,0,0,0,0,7,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,6,0,0,0,0,0],
-		[1,0,0,3,0,0,0,0,5,0,0,0,0,0],
-		[1,0,0,4,100,0,0,0,4,0,0,0,0,0],
-		[1,0,0,1,1,1,1,1,1,1,1,0,1,1],
-		[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
-		[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
-		[1,100,0,5,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	];
-	var map2 = 	[
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[1,4,0,2,0,0,0,0,2,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,8,0,0,0,100,0],
-		[1,0,2,2,0,0,0,0,7,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,6,0,0,0,0,0],
-		[1,0,0,3,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,4,0,0,0,0,0,0,0,100,0,0],
-		[1,0,0,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
-		[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
-		[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
-		[1,0,0,5,0,0,0,0,0,0,0,0,0,0],
-		[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	];
-	return  {
-		maps : [ 
-			map1, 
-			map2
+	function map1(){
+		var tiles = [
+			[
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,101,0,0,0,0,0,0,0,0,0,100,0],
+			[1,30,20,2,2,3,4,15,2,2,2,2,2,2],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,101,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
 		],
-		start : [
-			90, // x
-			20 // y
+		[
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,100,0],
+			[1,0,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,101,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,101,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
 		]
-	};		
-}
+		];
+		return {
+			maps : tiles,
+			sprites : [
+				{
+					x : 50,
+					y  : 50 
+				},
+				{
+					x : 100, 
+					y  : 10
+				}
+			]
+		};
+		};
 
-function map3(){
+	function map2(){
+		var map1 = 
+			[
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,2,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,8,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,7,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,6,0,0,0,0,0,0],
+			[1,0,0,3,0,0,0,5,0,0,0,0,0,0],
+			[1,0,0,4,100,0,0,4,0,0,0,0,0],
+			[1,0,0,1,1,1,1,1,1,1,0,0,0,1],
+			[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
+			[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
+			[1,0,0,5,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		];
+		var map2 = 	[
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,4,0,2,0,0,0,0,2,0,0,0,0,0],
+			[1,0,0,2,0,0,0,0,8,0,0,0,0,0],
+			[1,0,2,2,0,0,0,0,7,0,0,0,0,0],
+			[1,0,0,2,0,0,0,0,6,0,0,0,0,0],
+			[1,0,0,3,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,4,0,0,0,0,0,0,0,100,0,0],
+			[1,0,0,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
+			[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
+			[1,0,0,5,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		];
+		return  {
+			maps : [ 
+				map1, 
+				map2
+			],
+			start : [
+				80, // x
+				20 // y
+			],
+			sprites : [
+				{
+					x : 116,
+					y  : 80 
+				},
+					{
+						x : 143,
+						y : 119
+					}
+			]
+		};		
+		}
+
+	function map3(){
+		var map1 = [
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,2,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,8,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,7,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,6,0,0,0,0,0,0],
+			[1,0,0,3,0,0,0,5,0,0,0,0,0,0],
+			[1,0,0,4,100,0,0,4,0,0,0,0,0],
+			[1,0,0,1,1,1,1,1,1,1,0,0,0,1],
+			[1,0,0,12,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,2,0,0,0,0,0,0,0,101,0,0],
+			[1,0,0,4,0,0,0,0,1,1,1,1,1,1],
+			[1,0,0,5,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		]
+		return {
+			maps : [
+				map1
+			],
+			start : [
+				80, 
+				20
+			],
+			sprites : []
+		};
+	};
+
+	var levelindex = 0;
+	var mapindex = 0 
+
+	var mapFunctions = [
+		map1, 
+		map2,
+		map3
+	];
 
 
+	return {
+		nextLevel : function(){
+			var fn = mapFunctions[levelindex];
+			var mazz = fn();
+			this.maps = mazz.maps.map(function(m){
+				var w = new World(resolution);
+				w.init(m);
+				// return new World()
+				return w;
+			}, this);
+			levelindex++;
+			return {
+				map : this.maps[0],
+				start : mazz.start,
+				sprites : mazz.sprites
+			};
+		},
+		nextMap : function(){
+			var g = (mapindex + 1) % this.maps.length;
+			mapindex = g
+			return this.maps[mapindex];
+		},
+		maps : []
+	};
 }
 var GameScene = function(game, sprites){
     this.sprites = sprites;
@@ -268,10 +371,11 @@ var GameScene = function(game, sprites){
 	this.player = new Player(90, 20);
 	this.glitchMode = true;
 	this.game = game;
-	this.fontdrawer = fontDrawer();
+	this.fontdrawer = game.fontdrawer;
     sprites.push(this.player);
-	this.nextLevel(map1);
-	this.currentMap = 0;
+	this.maps = getMaps();
+	this.nextLevel();
+	this.playerSprite = game.images['pixrl1'];
 }
 
 GameScene.prototype = {
@@ -293,7 +397,46 @@ GameScene.prototype = {
         this.getPressedKeys(keys);
         this.movePlayer();
     },
-    getPressedKeys : function(keys){
+	nextLevel : function(){
+		this.sprites = [this.player];
+		// get new map
+		var mazzz = this.maps.nextLevel();
+		this.map = mazzz.map;
+		// add the players position
+		if(mazzz.start){
+			this.player.x = mazzz.start[0];
+			this.player.y = mazzz.start[1];
+		}
+		// add any sprites to it
+		if(mazzz.sprites) {
+			mazzz.sprites.forEach(function(s){
+				var spr = new Sprite(s.x, s.y);
+				spr.vx = spr.speed;
+				spr.vy = 0.5; // gravity
+				this.sprites.push(spr);
+			}, this);
+		}
+	},
+    render : function (ctx) {
+
+		renderMap.call(this, ctx, this.map, this.glitchMode);
+
+        this.sprites.forEach(function(s) {
+			// var ctx = this.ctx;
+			ctx.fillStyle = s.col || 'green';
+			ctx.fillRect(s.x, s.y, s.width, s.height);
+			ctx.drawImage(this.game.images['pixrl1'], s.img, 0, 16, 16, s.x-5, s.y-5, 16, 16 );
+		}, this);
+
+		this.map.collisionTiles.forEach(function(t){
+			var size = this.game.getPixelSize();
+			ctx.fillStyle = 'gray';
+			ctx.fillRect(t.x * size, t.y * size, size, size);
+		}, this);
+		this.map.collisionTiles = [];
+
+    },
+	getPressedKeys : function(keys){
 		var player = this.player;
 		player.vx = 0;
 		player.vy = 0;
@@ -325,67 +468,16 @@ GameScene.prototype = {
 			var tile = this.map.getTile(x, y);
 			if(tile === '100') {
 				console.log("switch pressed");
-				this.nextMap();
+				this.map = this.maps.nextMap();
 			}
 			if(tile === '101') {
 				console.log("end of level");
-				this.nextLevel(map2);
-
+				// var m = this.maps[this.currentMap++];
+				this.nextLevel();
+				
 			}
 			keys.released[keys.A] = false;
 		}
-    },
-	nextMap : function(){
-		var g = (this.currentMap + 1) % this.maps.length;
-		this.currentMap = g;
-		this.map = this.maps[this.currentMap];
-	},
-	nextLevel : function(fn){
-		this.sprites = [this.player];
-		// get new map
-		var mazzz = fn();
-		this.maps = mazzz.maps.map(function(m){
-			var w = new World(resolution);
-			w.init(m);
-			// return new World()
-			return w;
-		}, this);
-		this.map = this.maps[0];
-		// add the players position
-		if(mazzz.start){
-			this.player.x = mazzz.start[0];
-			this.player.y = mazzz.start[1];
-		}
-		// add any sprites to it
-		if(mazzz.sprites) {
-			mazzz.sprites.forEach(function(s){
-				var spr = new Sprite(s.x, s.y);
-				spr.vx = spr.speed;
-				spr.vy = 0.5; // gravity
-				this.sprites.push(spr);
-			}, this);
-		}
-	},
-    render : function (ctx) {
-		renderMap.call(this, ctx, this.map, this.glitchMode);
-
-        this.sprites.forEach(function(s) {
-			// var ctx = this.ctx;
-			ctx.fillStyle = s.col || 'green';
-			ctx.fillRect(s.x, s.y, s.width, s.height);
-		}, this);
-
-		this.map.collisionTiles.forEach(function(t){
-			var size = this.game.getPixelSize();
-			ctx.fillStyle = 'gray';
-			ctx.fillRect(t.x * size, t.y * size, size, size);
-		}, this);
-		this.map.collisionTiles = [];
-		var img = new Image();
-		img.src = 'pixrl1.png';
-		// ctx.drawImage(this.img, inx * 5, yindex *5, 5, 5, x, y, 5, 5 );
-
-		ctx.drawImage(img, 32, 0, 16, 16, this.player.x-5, this.player.y-5, 16, 16 );
     },
 	movePlayer : function() {
 		var player = this.player;
@@ -424,6 +516,12 @@ GameScene.prototype = {
 			var tilex1 = map.collidingPoint(x1, nextY);
 			var tilex2 = map.collidingPoint(x2, nextY);
 			if(tilex1 || tilex2 ) {
+				var tt = map.getTile(x1, nextY);
+				var tt1 = map.getTile(x2, nextY);
+				if(tt === "20" || tt1 === "20"){
+					//bad tile!!
+					//you die
+				}
 				player.vy = 0;
 			}
 		} else if(dy < 0) {
@@ -470,7 +568,8 @@ var Game = {
 	canvasSize : resolution,
 	glitchMode : true,
 	isGravity : true,
-	init : function(canvasId, width, height){
+	images : {},
+	init : function(canvasId, images){
 		var canvasSize = this.canvasSize * canvasScaleFactor;
 
 		var canvas = this.canvas = document.getElementById('canvas');
@@ -485,12 +584,13 @@ var Game = {
 	
 		this.keys = KeyListeners();
 
-//	this.scene1 = new GameScene(this, this.sprites, this.map);
+		this.images = images;
+
 		this.scene1 = new TitleScene(this);
-		this.fontdrawer = fontDrawer();
+		this.fontdrawer = fontDrawer(images.alphabet);
 	},
 	getPixelSize : function(){
-		return this.canvasSize / this.map.size;
+		return this.canvasSize / this.scene1.map.size;
 	},
 	render : function(){
 		var ctx = this.ctx;
@@ -506,7 +606,6 @@ var Game = {
 	},
 	nextScene : function(){
 		this.scene1	= new GameScene(this, this.sprites);
-		this.map = this.scene1.map;
 	},
 	log : function(text) {
 		this.logInfo.push(text);
@@ -532,15 +631,19 @@ var Game = {
 		// this.log("glitch : " + this.glitchMode);
 	},
 	run : function (timestamp) {
-		//
-		var now = Date.now();
-		var step = 1000 / 60;
-		var delta = now - Game.then;
-		if(delta > step){
-			Game.then = now - (delta % step); 
-			Game.render();
-			Game.update(delta);
-		}
+		// //
+		// var now = Date.now();
+		// var step = 1000 / 60;
+		// var delta = now - Game.then;
+		// if(delta > step){
+		// 	Game.then = now - (delta % step); 
+		// 	Game.render();
+		// 	Game.update(delta);
+		// }
+		stats.begin();
+		Game.render();
+		Game.update();
+		stats.end();
 		requestAnimationFrame(Game.run);
 	}
 };  
@@ -553,6 +656,7 @@ function Sprite(x, y, img){
 	this.vx = 0;
 	this.vy = 0;
 	this.speed = 0.5;
+	this.img = 0;
 	this.gravity = true;
 	this.isOnGround = false;
 	this.col = 'red';
@@ -562,6 +666,7 @@ function Sprite(x, y, img){
 
 Sprite.prototype = {
 	move : function(map){
+		var goOffEdge = false;
 		var sprite = this;
 		var gravity = 0.5;
 		// sprite.vy = 1;
@@ -589,7 +694,7 @@ Sprite.prototype = {
 			var y1 = sprite.y;
 			var y2 = sprite.y + sprite.height;
 			var blockingRightTile = map.collidingPoint(nextX, y1);
-			var aboutToGoOffledge;// = !map.collidingPoint(nextX, y2+1);
+			var aboutToGoOffledge = goOffEdge ? false : !map.collidingPoint(nextX, y2+1);
 			// check if sprite is going off edge of platform
 			if(blockingRightTile || aboutToGoOffledge){
 				dx = sprite.speed * -1;
@@ -600,7 +705,7 @@ Sprite.prototype = {
 			var y1 = sprite.y;
 			var y2 = sprite.y + sprite.height;
 			var blockingLeft = map.collidingPoint(nextX, y1);
-			var aboutToGoOffLedge; // = !map.collidingPoint(nextX, y2+1);
+			var aboutToGoOffLedge = goOffEdge ? false : !map.collidingPoint(nextX, y2+1);
 			if(blockingLeft || aboutToGoOffLedge){
 				dx = sprite.speed;
 				sprite.vx = dx;
@@ -635,16 +740,16 @@ World.prototype = {
 
 				if (d) {
 					var c;
+					if(d===15){
+						// debugger;
+					}
 					if(d===1){
 						c = randomLetter();
-					}else if(d === 100){
-						c = '100';
-					} else if( d === 101) {
-						c = '101';
-					} else {
-						c = String.fromCharCode(48 + d);
-					}
-
+					 } else if(d < 10){
+						 c = String.fromCharCode(48 + d);
+					 } else {
+						 c = d.toString();
+					 }
 					row.push(c);
 				} else {
 					row.push(randomLetter());
@@ -664,20 +769,10 @@ World.prototype = {
 		var y1 = y / s| 0;
 		return map.map[y1][x1];
 	},
-	// not used
-	randomGlitch : function(){
-		var length = this.size;
-		for(var y = 0; y < length; y++) {
-			for(var x = 0; x < length; x++) {
-				if(!this.isSolid(x, y)){
-					this.map[y][x] = randomLetter();
-				}
-			}
-		}
-	},
 
 	/**
-	 * takes a point
+	 * takes an x, y coordinate
+	 *  returns true if 
 	 */
 	collidingPoint : function (x, y){
 		var map = this;
@@ -689,12 +784,12 @@ World.prototype = {
 		var x1 = x / s| 0;
 		var y1 = y / s| 0;
 		if(map.isSolid(x1, y1)){
-			map.collisionTiles.push({x : x1, y : y1});
+			map.collisionTiles.push({x : x1, y : y1, type : map.map[y1][x1]  });
 		}
-		return this.isSolid(x1, y1);
+		return map.isSolid(x1, y1);
 	},
 	isSolid : function(x, y){
-		return this.collisions[y][x] !== 0 && this.collisions[y][x] < 16;
+		return this.collisions[y][x] !== 0 && this.collisions[y][x] < 50;
 	}
 };
 
@@ -767,10 +862,18 @@ function Player(x, y) {
 	this.x = x;
 	this.y = y;
 	this.type = 'player';
+	this.img = 32;
 }
 
 Player.prototype = new Sprite();
 Player.prototype.move = function(){}
-Game.init('canvas');
+var f = Images();
+f.load(function(im){
+    Game.init('canvas', im);
+    Game.run();
+});
+var stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
 
-Game.run();
+
