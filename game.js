@@ -567,11 +567,13 @@ function getMaps(){
 
 	return {
 		nextLevel : function(scene){
+			mapindex = 0;
 			levelindex++;
 			var l = this.restartMap(scene);
 			return l;
 		},
 		restartMap : function(scene){
+			mapindex = 0;
 			var fn = mapFunctions[levelindex];
 			if(!fn){
 				return false;
@@ -599,6 +601,7 @@ function getMaps(){
 	};
 }
 function song(){
+
     // create a new Web Audio API context
     var ac = new AudioContext();
 
@@ -1269,12 +1272,14 @@ GameScene.prototype = {
 		}
 		if (keys.pressed[keys.LEFT]) {
 			player.vx = -1;
+			player.img = 48;
 		}
 		if(keys.released[keys.LEFT]){
 			player.vx = 0;
 		}
 		if (keys.pressed[keys.RIGHT]) {
 			player.vx = 1;
+			player.img = 32;
 		}
 		if(keys.released[keys.UP]) {
 			// check map?
@@ -1282,8 +1287,9 @@ GameScene.prototype = {
 			var y = player.y + player.height/2;
 			var tile = this.map.getTile(x, y).t;
 			if(tile === '100') {
-				this.soundPlayer.play('pressSwitch');
+				
 				this.map = this.maps.nextMap();
+				this.soundPlayer.play('pressSwitch');
 			}
 			if(tile === '99') {
 				this.soundPlayer.play('endlevel');
